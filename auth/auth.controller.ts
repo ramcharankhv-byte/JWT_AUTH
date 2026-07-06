@@ -4,6 +4,12 @@ import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import { type JwtPayload } from "jsonwebtoken";
 import { asyncHandler } from "../utils/acyncHandler.js";
+import {
+  generateTokens,
+  register,
+  login,
+  refreshTokens,
+} from "./auth.services.js";
 
 interface generateTokens {
   accessToken: string;
@@ -17,53 +23,17 @@ interface CustomJwtPayload extends JwtPayload {
   email?: string;
 }
 
-const generateTokens = async (userId: any): Promise<generateTokens> => {
-  try {
-    const user: IUser | null = await User.findById(userId);
-
-    if (!user) {
-      throw new ApiError(404, "User not found");
-    }
-
-    const accessToken = await user.generateAccessToken();
-    const refreshToken = await user.generateRefreshToken();
-
-    return { accessToken, refreshToken };
-  } catch (err) {
-    throw new ApiError(500, "Unknown Error Occured while creating tokens");
-  }
-};
-
 export const registerUser = asyncHandler(async (req: any, res: any) => {
   const { email, password } = req.body;
 
-  const userExists = await User.findOne({ email: email });
-
-  if (userExists) {
-    throw new ApiError(400, "User Already Exists");
-  }
-
-  const user = await User.create({
-    email: email,
-    password: password,
-  });
-
-  await user.save();
-
-  const { accessToken, refreshToken } = await generateTokens(user._id);
-
-  user.refreshToken = refreshToken;
-  await user.save({ validateBeforeSave: false });
-
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken",
+  const { createdUser, accessToken, refreshToken } = await register(
+    email,
+    password,
   );
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    secure: true,
   };
 
   return res
@@ -82,32 +52,14 @@ export const registerUser = asyncHandler(async (req: any, res: any) => {
 export const loginUser = asyncHandler(async (req: any, res: any) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email: email });
-
-  if (!user) {
-    throw new ApiError(404, "User Not Found");
-  }
-
-  const passwordVerify = await user.isPassCorrect(password);
-
-  if (!passwordVerify) {
-    throw new ApiError(401, "Entered Wrong Password");
-  }
-
-  const { accessToken, refreshToken } = await generateTokens(user._id);
-
-  user.refreshToken = refreshToken;
-  await user.save({ validateBeforeSave: false });
-
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken",
+  const { createdUser, accessToken, refreshToken } = await login(
+    email,
+    password,
   );
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    secure: true,
   };
 
   return res
@@ -135,34 +87,27 @@ export const getUser = asyncHandler(async (req: any, res: any) => {
   return res.status(201).json(new ApiResponse(201, user, "User Fetched"));
 });
 
-export const refreshTokens = asyncHandler(async (req: any, res: any) => {
+export const refreshAuthTokens = asyncHandler(async (req: any, res: any) => {
   const incomingToken = req.cookie.refreshToken;
 
-  if (!incomingToken) {
-    throw new ApiError(404, "No refresh token found please relogin");
-  }
+  const { accessToken, newRefreshToken } = await refreshTokens(incomingToken);
 
-  const decodedToken = await jwt.verify(incomingToken, process.env.JWT_SECRET!);
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
 
-  const user = await User.findById((decodedToken as CustomJwtPayload)?._id);
-
-  if (!user) {
-    throw new ApiError(401, "Invalid Token");
-  }
-
-  if (incomingToken !== user?.refreshToken) {
-    throw new ApiError(401, "No Token Found in DATABASE");
-  }
-
-  const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
-    user._id,
-  );
-
-  user.refreshToken = newRefreshToken;
-
-  await user.save();
-
-  return { accessToken, newRefreshToken };
+  return res
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", newRefreshToken, options)
+    .status(201)
+    .json(
+      new ApiResponse(
+        201,
+        { accessToken, newRefreshToken },
+        "Tokens Refreshed",
+      ),
+    );
 });
 
 export const logout = asyncHandler(async (req: any, res: any) => {
@@ -180,9 +125,7 @@ export const logout = asyncHandler(async (req: any, res: any) => {
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    secure: true,
   };
 
   return res

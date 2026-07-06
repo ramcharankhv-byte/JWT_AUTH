@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   registerUser,
   loginUser,
-  refreshTokens,
+  refreshAuthTokens,
   logout,
   getUser,
 } from "./auth.controller.js";
@@ -16,7 +16,7 @@ authRouter.post("/auth/login", loginUser);
 
 authRouter.use(verifyJwt).get("/profile", getUser);
 
-authRouter.use(verifyJwt).patch("/auth/refresh", refreshTokens);
+authRouter.use(verifyJwt).patch("/auth/refresh", refreshAuthTokens);
 
 authRouter.use(verifyJwt).post("auth/logout", logout);
 
