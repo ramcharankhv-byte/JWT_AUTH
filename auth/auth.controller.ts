@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import { type JwtPayload } from "jsonwebtoken";
+import { asyncHandler } from "../utils/acyncHandler.js";
 
 interface generateTokens {
   accessToken: string;
@@ -33,7 +34,7 @@ const generateTokens = async (userId: any): Promise<generateTokens> => {
   }
 };
 
-export const registerUser = async (req: any, res: any) => {
+export const registerUser = asyncHandler(async (req: any, res: any) => {
   const { email, password } = req.body;
 
   const userExists = await User.findOne({ email: email });
@@ -76,9 +77,9 @@ export const registerUser = async (req: any, res: any) => {
         "User Created",
       ),
     );
-};
+});
 
-export const loginUser = async (req: any, res: any) => {
+export const loginUser = asyncHandler(async (req: any, res: any) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email: email });
@@ -120,9 +121,9 @@ export const loginUser = async (req: any, res: any) => {
         "User LoggedIn",
       ),
     );
-};
+});
 
-export const getUser = async (req: any, res: any) => {
+export const getUser = asyncHandler(async (req: any, res: any) => {
   const user = await User.findById(req.user._id).select(
     "-password -refreshToken",
   );
@@ -132,9 +133,9 @@ export const getUser = async (req: any, res: any) => {
   }
 
   return res.status(201).json(new ApiResponse(201, user, "User Fetched"));
-};
+});
 
-export const refreshTokens = async (req: any, res: any) => {
+export const refreshTokens = asyncHandler(async (req: any, res: any) => {
   const incomingToken = req.cookie.refreshToken;
 
   if (!incomingToken) {
@@ -162,9 +163,9 @@ export const refreshTokens = async (req: any, res: any) => {
   await user.save();
 
   return { accessToken, newRefreshToken };
-};
+});
 
-export const logout = async (req: any, res: any) => {
+export const logout = asyncHandler(async (req: any, res: any) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -189,4 +190,4 @@ export const logout = async (req: any, res: any) => {
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, "User Logged Out"));
-};
+});
