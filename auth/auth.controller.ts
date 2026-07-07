@@ -17,10 +17,10 @@ export const registerUser = asyncHandler(async (req: any, res: any) => {
   return res
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .status(202)
+    .status(201)
     .json(
       new ApiResponse(
-        200,
+        201,
         { createdUser, accessToken, refreshToken },
         "User Created",
       ),
@@ -38,10 +38,10 @@ export const loginUser = asyncHandler(async (req: any, res: any) => {
   return res
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .status(202)
+    .status(201)
     .json(
       new ApiResponse(
-        200,
+        201,
         { createdUser, accessToken, refreshToken },
         "User LoggedIn",
       ),
@@ -57,11 +57,11 @@ export const getUser = asyncHandler(async (req: any, res: any) => {
     throw new ApiError(404, "User Not Found");
   }
 
-  return res.status(201).json(new ApiResponse(201, user, "User Fetched"));
+  return res.status(200).json(new ApiResponse(200, user, "User Fetched"));
 });
 
 export const refreshAuthTokens = asyncHandler(async (req: any, res: any) => {
-  const incomingToken = req.cookie.refreshToken;
+  const incomingToken = req.cookies.refreshToken;
 
   const { accessToken, newRefreshToken } = await refreshTokens(incomingToken);
 

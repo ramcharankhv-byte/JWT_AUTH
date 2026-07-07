@@ -11,3 +11,8 @@ export const passwordSchema = z
   .min(6, "Password must contain a minimum fo 6 characters")
   .trim()
   .nonempty({ message: "Password must not be empty" });
+
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});

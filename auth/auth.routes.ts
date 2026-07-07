@@ -8,28 +8,18 @@ import {
 } from "./auth.controller.js";
 import { verifyJwt } from "./auth.middleware.js";
 import { validate } from "../utils/validator.js";
-import { emailSchema, passwordSchema } from "./auth.validator.js";
+import { emailSchema, loginSchema, passwordSchema } from "./auth.validator.js";
 
 const authRouter = Router();
 
-authRouter.post(
-  "/auth/register",
-  validate(emailSchema, "body"),
-  validate(passwordSchema, "body"),
-  registerUser,
-);
+authRouter.post("/register", validate(loginSchema, "body"), registerUser);
 
-authRouter.post(
-  "/auth/login",
-  validate(emailSchema, "body"),
-  validate(passwordSchema, "body"),
-  loginUser,
-);
+authRouter.post("/login", validate(loginSchema, "body"), loginUser);
 
 authRouter.use(verifyJwt).get("/profile", getUser);
 
-authRouter.use(verifyJwt).patch("/auth/refresh", refreshAuthTokens);
+authRouter.use(verifyJwt).patch("/refresh", refreshAuthTokens);
 
-authRouter.use(verifyJwt).post("auth/logout", logout);
+authRouter.use(verifyJwt).post("/logout", logout);
 
 export default authRouter;
