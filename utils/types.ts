@@ -15,3 +15,13 @@ export const options = {
   httpOnly: true,
   secure: true,
 };
+
+export interface IUser extends Document {
+  email: string;
+  password?: string;
+  refreshToken: string;
+  isModified(password: string): Promise<boolean>;
+  isPassCorrect(password: string): Promise<boolean>;
+  generateRefreshToken(): Promise<string>;
+  generateAccessToken(): Promise<string>;
+}

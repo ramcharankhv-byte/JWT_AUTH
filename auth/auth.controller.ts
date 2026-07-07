@@ -1,17 +1,10 @@
-import User, { type IUser } from "./auth.model.js";
+import User from "./auth.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import jwt from "jsonwebtoken";
-import { type JwtPayload } from "jsonwebtoken";
 import { asyncHandler } from "../utils/acyncHandler.js";
-import {
-  generateTokens,
-  register,
-  login,
-  refreshTokens,
-} from "./auth.services.js";
+import { register, login, refreshTokens } from "./auth.services.js";
 
-import { type tokens, type CustomJwtPayload, options } from "../utils/types.js";
+import { options } from "../utils/types.js";
 
 export const registerUser = asyncHandler(async (req: any, res: any) => {
   const { email, password } = req.body;
