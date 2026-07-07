@@ -7,7 +7,7 @@ import {
   getUser,
 } from "./auth.controller.js";
 import { verifyJwt } from "./auth.middleware.js";
-import { validate } from "../validator.js";
+import { validate } from "../utils/validator.js";
 import { emailSchema, passwordSchema } from "./auth.validator.js";
 
 const authRouter = Router();
