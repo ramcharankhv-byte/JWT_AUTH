@@ -11,17 +11,7 @@ import {
   refreshTokens,
 } from "./auth.services.js";
 
-interface generateTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-interface CustomJwtPayload extends JwtPayload {
-  _id: string;
-  issuedAt: number;
-  expiresAt: number;
-  email?: string;
-}
+import { type tokens, type CustomJwtPayload, options } from "../utils/types.js";
 
 export const registerUser = asyncHandler(async (req: any, res: any) => {
   const { email, password } = req.body;
@@ -30,11 +20,6 @@ export const registerUser = asyncHandler(async (req: any, res: any) => {
     email,
     password,
   );
-
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
 
   return res
     .cookie("accessToken", accessToken, options)
@@ -56,11 +41,6 @@ export const loginUser = asyncHandler(async (req: any, res: any) => {
     email,
     password,
   );
-
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
 
   return res
     .cookie("accessToken", accessToken, options)
@@ -92,11 +72,6 @@ export const refreshAuthTokens = asyncHandler(async (req: any, res: any) => {
 
   const { accessToken, newRefreshToken } = await refreshTokens(incomingToken);
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-
   return res
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", newRefreshToken, options)
@@ -122,11 +97,6 @@ export const logout = asyncHandler(async (req: any, res: any) => {
       new: true,
     },
   );
-
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
 
   return res
     .status(200)

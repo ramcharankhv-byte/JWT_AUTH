@@ -2,22 +2,18 @@ import User, { type IUser } from "./auth.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
-import { type JwtPayload } from "jsonwebtoken";
+
 import { asyncHandler } from "../utils/acyncHandler.js";
+import { type tokens, type CustomJwtPayload, options } from "../utils/types.js";
 
-interface generateTokens {
-  accessToken: string;
-  refreshToken: string;
-}
+const findUser = async (userId: any) => {
+  const createdUser = await User.findById(userId).select(
+    "-password -refreshToken",
+  );
+  return { createdUser };
+};
 
-interface CustomJwtPayload extends JwtPayload {
-  _id: string;
-  issuedAt: number;
-  expiresAt: number;
-  email?: string;
-}
-
-export const generateTokens = async (userId: any): Promise<generateTokens> => {
+export const generateTokens = async (userId: any): Promise<tokens> => {
   try {
     const user: IUser | null = await User.findById(userId);
 
@@ -53,9 +49,7 @@ export const register = async (email: any, password: any) => {
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false });
 
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken",
-  );
+  const createdUser = await findUser(user._id);
 
   return { createdUser, accessToken, refreshToken };
 };
@@ -78,9 +72,7 @@ export const login = async (email: any, password: any) => {
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false });
 
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken",
-  );
+  const createdUser = await findUser(user._id);
   return { createdUser, accessToken, refreshToken };
 };
 
