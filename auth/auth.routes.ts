@@ -18,7 +18,7 @@ authRouter.post("/login", validate(loginSchema, "body"), loginUser);
 
 authRouter.use(verifyJwt).get("/profile", getUser);
 
-authRouter.use(verifyJwt).patch("/refresh", refreshAuthTokens);
+authRouter.patch("/refresh", refreshAuthTokens);
 
 authRouter.use(verifyJwt).post("/logout", logout);
 
