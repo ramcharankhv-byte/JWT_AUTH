@@ -1,4 +1,4 @@
-# JWT AUTHENTICATION
+# **JWT AUTHENTICATION**
 
 ## TECH STACK:
 
@@ -275,4 +275,4 @@ Refresh Token :
      message: string;
      success: boolean;
 
-All the testing are done in Postman Api
+### **Note** : **_All the testing are done in Postman Api_**
