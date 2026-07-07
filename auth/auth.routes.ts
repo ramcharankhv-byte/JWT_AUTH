@@ -7,12 +7,24 @@ import {
   getUser,
 } from "./auth.controller.js";
 import { verifyJwt } from "./auth.middleware.js";
+import { validate } from "../validator.js";
+import { emailSchema, passwordSchema } from "./auth.validator.js";
 
 const authRouter = Router();
 
-authRouter.post("/auth/register", registerUser);
+authRouter.post(
+  "/auth/register",
+  validate(emailSchema, "body"),
+  validate(passwordSchema, "body"),
+  registerUser,
+);
 
-authRouter.post("/auth/login", loginUser);
+authRouter.post(
+  "/auth/login",
+  validate(emailSchema, "body"),
+  validate(passwordSchema, "body"),
+  loginUser,
+);
 
 authRouter.use(verifyJwt).get("/profile", getUser);
 
