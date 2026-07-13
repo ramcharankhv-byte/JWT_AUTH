@@ -72,7 +72,7 @@ PORT=8080
 
 MONGO_URL=URL
 
-JWT_SECRET=**\*\*\*\*\***
+JWT_SECRET=**\*\*\*\*\****
 
 ACCESS_TOKEN_EXPIRY=15m
 
