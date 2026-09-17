@@ -275,4 +275,4 @@ Refresh Token :
      message: string;
      success: boolean;
 
-### **Note** : **_All the testing are done in Postman Api_**
+**Note** : **_All the testing are done in Postman Api_**
